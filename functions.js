@@ -133,7 +133,7 @@ function draw(y, x, i) {
             drawNumber(y, x, "#888888", 8);
             break;
         case "?":
-            draw(y, x, "");
+            ctx.drawImage(closed, x * grid + x + 1, y * grid + y + 1);
             drawNumber(y, x, "#0000ff", "?");
     }
 }
