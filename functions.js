@@ -152,7 +152,7 @@ function field() {
 }
 
 function drawNumber(y, x, c, n) {
-    ctx.font = "13px arial";
+    ctx.font = "600 13px arial";
     ctx.textBaseline = "middle";
     ctx.textAlign = "center";
     ctx.fillStyle = c;
