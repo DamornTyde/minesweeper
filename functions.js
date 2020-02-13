@@ -34,7 +34,7 @@ ctx2.fillRect(2, 2, grid - 4, grid - 4);
 
 ctx3.strokeStyle = "#000000";
 ctx3.lineWidth = 2;
-ctx3.moveTo(3, 12);
+ctx3.moveTo(6, 12);
 ctx3.lineTo(13, 12);
 ctx3.moveTo(10, 3);
 ctx3.lineTo(10, 12);
