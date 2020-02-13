@@ -10,13 +10,12 @@ const ctx4 = falseFlag.getContext("2d");
 const mine = document.createElement("canvas");
 const ctx5 = mine.getContext("2d");
 const grid = 16;
+const size = 50;
 
-var game = [["", "E", 1, 2, 3],
-    ["", "", 4, 5, 6],
-    ["m", "M", 7, 8, "?"]];
+var game = [];
 
-canvas.height = game.length * grid + game.length + 1;
-canvas.width = game[0].length * grid + game[0].length + 1;
+canvas.height = size * grid + size + 1;
+canvas.width = size * grid + size + 1;
 
 ctx.fillStyle = "#6b6b6b";
 ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -74,9 +73,6 @@ ctx5.fillStyle = "#ffffff";
 ctx5.fillRect(5, 5, 2, 2);
 
 field();
-draw(1, 0, "F");
-draw(1, 1, "F");
-draw(1, 1, "X");
 
 function draw(y, x, i) {
     switch (i) {
@@ -102,39 +98,39 @@ function draw(y, x, i) {
             break;
         case 1:
             openCell(y, x, "#bdbdbd");
-            drawNumber(y, x, "#0000ff", 1);
+            drawNumber(y, x, "#0000ff", i);
             break;
         case 2:
             openCell(y, x, "#bdbdbd");
-            drawNumber(y, x, "#008800", 2);
+            drawNumber(y, x, "#008800", i);
             break;
         case 3:
             openCell(y, x, "#bdbdbd");
-            drawNumber(y, x, "#ff0000", 3);
+            drawNumber(y, x, "#ff0000", i);
             break;
         case 4:
             openCell(y, x, "#bdbdbd");
-            drawNumber(y, x, "#000088", 4);
+            drawNumber(y, x, "#000088", i);
             break;
         case 5:
             openCell(y, x, "#bdbdbd");
-            drawNumber(y, x, "#880000", 5);
+            drawNumber(y, x, "#880000", i);
             break;
         case 6:
             openCell(y, x, "#bdbdbd");
-            drawNumber(y, x, "#8888ff", 6);
+            drawNumber(y, x, "#8888ff", i);
             break;
         case 7:
             openCell(y, x, "#bdbdbd");
-            drawNumber(y, x, "#000000", 7);
+            drawNumber(y, x, "#000000", i);
             break;
         case 8:
             openCell(y, x, "#bdbdbd");
-            drawNumber(y, x, "#888888", 8);
+            drawNumber(y, x, "#888888", i);
             break;
         case "?":
             ctx.drawImage(closed, x * grid + x + 1, y * grid + y + 1);
-            drawNumber(y, x, "#0000ff", "?");
+            drawNumber(y, x, "#0000ff", i);
     }
 }
 
@@ -144,8 +140,39 @@ function openCell(y, x, c) {
 }
 
 function field() {
+    var row = [];
+    var place = [];
+    game.splice(0, game.length);
+    while (row.length < size) {
+        row.push("");
+    }
+    while (game.length < size) {
+        game.push(row.slice());
+    }
     for (var y = 0; y < game.length; y++) {
         for (var x = 0; x < game[y].length; x++) {
+            draw(y, x, game[y][x]);
+            place.push({
+                y: y,
+                x: x
+            });
+        }
+    }
+    for (var i = 0; i < 50; i++) {
+        const m = Math.floor(Math.random() * place.length);
+        game[place[m].y][place[m].x] = "m";
+        place.splice(m, 1);
+    }
+    for (var y = 0; y < game.length; y++) {
+        for (var x = 0; x < game[y].length; x++) {
+            if (game[y][x] != "m") {
+                const count = nearby(y, x, false);
+                if (count > 0) {
+                    game[y][x] = count;
+                } else {
+                    game[y][x] = "E";
+                }
+            }
             draw(y, x, game[y][x]);
         }
     }
@@ -157,4 +184,25 @@ function drawNumber(y, x, c, n) {
     ctx.textAlign = "center";
     ctx.fillStyle = c;
     ctx.fillText(n, x * grid + x + 9, y * grid + y + 10);
+}
+
+function nearby(y, x, r) {
+    var count = 0;
+    for (var i = -1; i < 2; i += 2) {
+        if (r) {
+            count += check(y, x + i);
+        } else {
+            count += check(y + i, x);
+            count += check(y, x + i);
+            count += nearby(y + i, x, true);
+        }
+    }
+    return count;
+}
+
+function check(y, x) {
+    if (y >= 0 && x >= 0 && y < game.length && x < game[y].length && game[y][x] == "m") {
+        return 1;
+    }
+    return 0;
 }
