@@ -106,7 +106,7 @@ function draw(y, x, i) {
             break;
         case 2:
             openCell(y, x, "#bdbdbd");
-            drawNumber(y, x, "#00ff00", 2);
+            drawNumber(y, x, "#008800", 2);
             break;
         case 3:
             openCell(y, x, "#bdbdbd");
@@ -152,7 +152,7 @@ function field() {
 }
 
 function drawNumber(y, x, c, n) {
-    ctx.font = "600 13px arial";
+    ctx.font = "800 13px arial";
     ctx.textBaseline = "middle";
     ctx.textAlign = "center";
     ctx.fillStyle = c;
