@@ -303,7 +303,7 @@ document.addEventListener("mouseup", function (e) {
     var x = e.clientX - canvasx;
     clearGhost();
     mousedown = false;
-    if (y <= canvas.width && x <= canvas.height) {
+    if (y < canvas.width && x < canvas.height) {
         y = Math.floor(y / (grid + 1));
         x = Math.floor(x / (grid + 1));
         buffer.push({
