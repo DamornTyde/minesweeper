@@ -243,7 +243,7 @@ function clearGhost() {
 
 function openGround() {
     while (buffer.length > 0) {
-        if (game[buffer[0].y][buffer[0].x] == "" || game[buffer[0].y][buffer[0].x] == "O" || game[buffer[0].y][buffer[0].x] == "?") {
+        if (game[buffer[0].y][buffer[0].x] == "" || game[buffer[0].y][buffer[0].x] == "O") {
             if (field[buffer[0].y][buffer[0].x] == "m") {
                 draw(buffer[0].y, buffer[0].x, "M");
                 for (var y = 0; y < game.length; y++) {
