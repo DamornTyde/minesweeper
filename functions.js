@@ -11,8 +11,18 @@ const mine = document.createElement("canvas");
 const ctx5 = mine.getContext("2d");
 const grid = 16;
 const size = 50;
+const canvasx = canvas.offsetLeft;
+const canvasy = canvas.offsetTop;
 
 var game = [];
+var field = [];
+var lvl = 1;
+var mousedown = false;
+var ghost = [];
+var buffer = [];
+var opened = 0;
+
+//
 
 canvas.height = size * grid + size + 1;
 canvas.width = size * grid + size + 1;
@@ -72,7 +82,9 @@ ctx5.fill();
 ctx5.fillStyle = "#ffffff";
 ctx5.fillRect(5, 5, 2, 2);
 
-field();
+newGame();
+
+//
 
 function draw(y, x, i) {
     switch (i) {
@@ -139,15 +151,17 @@ function openCell(y, x, c) {
     ctx.fillRect(x * grid + x + 1, y * grid + y + 1, grid, grid);
 }
 
-function field() {
+function newGame() {
     var row = [];
     var place = [];
     game.splice(0, game.length);
+    opened = 0;
     while (row.length < size) {
         row.push("");
     }
     while (game.length < size) {
         game.push(row.slice());
+        field.push(row.slice());
     }
     for (var y = 0; y < game.length; y++) {
         for (var x = 0; x < game[y].length; x++) {
@@ -158,22 +172,19 @@ function field() {
             });
         }
     }
-    for (var i = 0; i < 50; i++) {
+    for (var i = 0; i < lvl * 10; i++) {
         const m = Math.floor(Math.random() * place.length);
-        game[place[m].y][place[m].x] = "m";
+        field[place[m].y][place[m].x] = "m";
         place.splice(m, 1);
     }
-    for (var y = 0; y < game.length; y++) {
-        for (var x = 0; x < game[y].length; x++) {
-            if (game[y][x] != "m") {
-                const count = nearby(y, x, false);
+    for (var y = 0; y < field.length; y++) {
+        for (var x = 0; x < field[y].length; x++) {
+            if (field[y][x] != "m") {
+                const count = nearby(y, x, false, "m");
                 if (count > 0) {
-                    game[y][x] = count;
-                } else {
-                    game[y][x] = "E";
+                    field[y][x] = count;
                 }
             }
-            draw(y, x, game[y][x]);
         }
     }
 }
@@ -186,23 +197,120 @@ function drawNumber(y, x, c, n) {
     ctx.fillText(n, x * grid + x + 9, y * grid + y + 10);
 }
 
-function nearby(y, x, r) {
+function nearby(y, x, r, cc) {
     var count = 0;
     for (var i = -1; i < 2; i += 2) {
         if (r) {
-            count += check(y, x + i);
+            count += check(y, x + i, cc);
         } else {
-            count += check(y + i, x);
-            count += check(y, x + i);
-            count += nearby(y + i, x, true);
+            count += check(y + i, x, cc);
+            count += check(y, x + i, cc);
+            count += nearby(y + i, x, true, cc);
         }
     }
     return count;
 }
 
-function check(y, x) {
-    if (y >= 0 && x >= 0 && y < game.length && x < game[y].length && game[y][x] == "m") {
-        return 1;
+function check(y, x, cc) {
+    if (y >= 0 && x >= 0 && y < game.length && x < game[y].length) {
+        switch (cc) {
+            case "m":
+                if (field[y][x] == "m") {
+                    return 1;
+                }
+                break;
+            case "E":
+                if (game[y][x] == "") {
+                    game[y][x] = "O";
+                    buffer.push({
+                        y: y,
+                        x: x
+                    });
+                    return 1;
+                }
+        }
     }
     return 0;
 }
+
+function clearGhost() {
+    while (ghost.length > 0) {
+        draw(ghost[0].y, ghost[0].x, "");
+        ghost.shift();
+    }
+}
+
+function openGround() {
+    while (buffer.length > 0) {
+        if (game[buffer[0].y][buffer[0].x] == "" || game[buffer[0].y][buffer[0].x] == "O") {
+            if (field[buffer[0].y][buffer[0].x] == "m") {
+                game[buffer[0].y][buffer[0].x] = "M";
+                draw(buffer[0].y, buffer[0].x, "M");
+                for (var y = 0; y < game.length; y++) {
+                    for (var x = 0; x < game[y].length; x++) {
+                        if (field[y][x] == "m" && game[y][x] == "") {
+                            game[y][x] = "m";
+                            draw(y, x, "m");
+                        }
+                    }
+                }
+            } else if (field[buffer[0].y][buffer[0].x] == "") {
+                game[buffer[0].y][buffer[0].x] = "E";
+                draw(buffer[0].y, buffer[0].x, "E");
+                opened += nearby(buffer[0].y, buffer[0].x, false, "E");
+            } else {
+                const temp = field[buffer[0].y][buffer[0].x];
+                game[buffer[0].y][buffer[0].x] = temp;
+                draw(buffer[0].y, buffer[0].x, temp);
+            }
+        }
+        buffer.shift();
+    }
+}
+
+//
+
+document.getElementById("game").addEventListener("mousedown", function (e) {
+    const y = Math.floor((e.clientY - canvasy) / (grid + 1));
+    const x = Math.floor((e.clientX - canvasx) / (grid + 1));
+    mousedown = true;
+    if (game[y][x] == "") {
+        draw(y, x, "E");
+        ghost.push({
+            y: y,
+            x: x
+        });
+    }
+});
+
+document.getElementById("game").addEventListener("mousemove", function (e) {
+    const y = Math.floor((e.clientY - canvasy) / (grid + 1));
+    const x = Math.floor((e.clientX - canvasx) / (grid + 1));
+    if (mousedown) {
+        clearGhost();
+        if (game[y][x] == "") {
+            draw(y, x, "E");
+            ghost.push({
+                y: y,
+                x: x
+            });
+        }
+    }
+});
+
+document.addEventListener("mouseup", function (e) {
+    var y = e.clientY - canvasy;
+    var x = e.clientX - canvasx;
+    clearGhost();
+    mousedown = false;
+    if (y <= canvas.width && x <= canvas.height) {
+        y = Math.floor(y / (grid + 1));
+        x = Math.floor(x / (grid + 1));
+        buffer.push({
+            y: y,
+            x: x
+        });
+        openGround();
+        opened++;
+    }
+});
