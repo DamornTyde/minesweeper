@@ -87,6 +87,7 @@ newGame();
 //
 
 function draw(y, x, i) {
+    game[y][x] = i;
     switch (i) {
         case "":
             ctx.drawImage(closed, x * grid + x + 1, y * grid + y + 1);
@@ -244,23 +245,21 @@ function openGround() {
     while (buffer.length > 0) {
         if (game[buffer[0].y][buffer[0].x] == "" || game[buffer[0].y][buffer[0].x] == "O") {
             if (field[buffer[0].y][buffer[0].x] == "m") {
-                game[buffer[0].y][buffer[0].x] = "M";
                 draw(buffer[0].y, buffer[0].x, "M");
                 for (var y = 0; y < game.length; y++) {
                     for (var x = 0; x < game[y].length; x++) {
                         if (field[y][x] == "m" && game[y][x] == "") {
-                            game[y][x] = "m";
                             draw(y, x, "m");
+                        } else if (game[y][x] == "F" && field[y][x] != "m") {
+                            draw(y, x, "X");
                         }
                     }
                 }
             } else if (field[buffer[0].y][buffer[0].x] == "") {
-                game[buffer[0].y][buffer[0].x] = "E";
                 draw(buffer[0].y, buffer[0].x, "E");
                 opened += nearby(buffer[0].y, buffer[0].x, false, "E");
             } else {
                 const temp = field[buffer[0].y][buffer[0].x];
-                game[buffer[0].y][buffer[0].x] = temp;
                 draw(buffer[0].y, buffer[0].x, temp);
             }
         }
