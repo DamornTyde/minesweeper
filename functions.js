@@ -243,7 +243,7 @@ function clearGhost() {
 
 function openGround() {
     while (buffer.length > 0) {
-        if (game[buffer[0].y][buffer[0].x] == "" || game[buffer[0].y][buffer[0].x] == "O") {
+        if (game[buffer[0].y][buffer[0].x] == "" || game[buffer[0].y][buffer[0].x] == "O" || game[buffer[0].y][buffer[0].x] == "?") {
             if (field[buffer[0].y][buffer[0].x] == "m") {
                 draw(buffer[0].y, buffer[0].x, "M");
                 for (var y = 0; y < game.length; y++) {
@@ -267,13 +267,17 @@ function openGround() {
     }
 }
 
+window.addEventListener('contextmenu', function (e) {
+    e.preventDefault();
+  }, false);
+
 //
 
 document.getElementById("game").addEventListener("mousedown", function (e) {
     const y = Math.floor((e.clientY - canvasy) / (grid + 1));
     const x = Math.floor((e.clientX - canvasx) / (grid + 1));
-    mousedown = true;
-    if (game[y][x] == "") {
+    if (e.which == 1 && game[y][x] == "") {
+        mousedown = true;
         draw(y, x, "E");
         ghost.push({
             y: y,
@@ -285,7 +289,7 @@ document.getElementById("game").addEventListener("mousedown", function (e) {
 document.getElementById("game").addEventListener("mousemove", function (e) {
     const y = Math.floor((e.clientY - canvasy) / (grid + 1));
     const x = Math.floor((e.clientX - canvasx) / (grid + 1));
-    if (mousedown) {
+    if (e.which == 1 && mousedown) {
         clearGhost();
         if (game[y][x] == "") {
             draw(y, x, "E");
@@ -302,7 +306,7 @@ document.addEventListener("mouseup", function (e) {
     var x = e.clientX - canvasx;
     clearGhost();
     mousedown = false;
-    if (y < canvas.width && x < canvas.height) {
+    if (e.which == 1 && y < canvas.width && x < canvas.height) {
         y = Math.floor(y / (grid + 1));
         x = Math.floor(x / (grid + 1));
         buffer.push({
@@ -311,5 +315,20 @@ document.addEventListener("mouseup", function (e) {
         });
         openGround();
         opened++;
+    }
+});
+
+document.addEventListener("contextmenu", function (e) {
+    const y = Math.floor((e.clientY - canvasy) / (grid + 1));
+    const x = Math.floor((e.clientX - canvasx) / (grid + 1));
+    switch (game[y][x]) {
+        case "":
+            draw(y, x, "F");
+            break;
+        case "F":
+            draw(y, x, "?");
+            break;
+        case "?":
+            draw(y, x, "");
     }
 });
