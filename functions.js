@@ -250,7 +250,7 @@ function openGround() {
                     for (var x = 0; x < game[y].length; x++) {
                         if (field[y][x] == "m" && game[y][x] == "") {
                             draw(y, x, "m");
-                        } else if (game[y][x] == "F" && field[y][x] != "m") {
+                        } else if ((game[y][x] == "F" && field[y][x] != "m") || (game[y][x] == "?" && field[y][x] != "m")) {
                             draw(y, x, "X");
                         }
                     }
@@ -267,11 +267,11 @@ function openGround() {
     }
 }
 
+//
+
 window.addEventListener('contextmenu', function (e) {
     e.preventDefault();
-  }, false);
-
-//
+}, false);
 
 document.getElementById("game").addEventListener("mousedown", function (e) {
     const y = Math.floor((e.clientY - canvasy) / (grid + 1));
