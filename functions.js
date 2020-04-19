@@ -198,30 +198,30 @@ function drawNumber(y, x, c, n) {
     ctx.fillText(n, x * grid + x + 9, y * grid + y + 10);
 }
 
-function nearby(y, x, r, cc) {
+function nearby(y, x, r, c) {
     var count = 0;
     for (var i = -1; i < 2; i += 2) {
         if (r) {
-            count += check(y, x + i, cc);
+            count += check(y, x + i, c);
         } else {
-            count += check(y + i, x, cc);
-            count += check(y, x + i, cc);
-            count += nearby(y + i, x, true, cc);
+            count += check(y + i, x, c);
+            count += check(y, x + i, c);
+            count += nearby(y + i, x, true, c);
         }
     }
     return count;
 }
 
-function check(y, x, cc) {
+function check(y, x, c) {
     if (y >= 0 && x >= 0 && y < game.length && x < game[y].length) {
-        switch (cc) {
+        switch (c) {
             case "m":
                 if (field[y][x] == "m") {
                     return 1;
                 }
                 break;
             case "E":
-                if (game[y][x] == "") {
+                if (game[y][x] == "" || game[y][x] == "?") {
                     game[y][x] = "O";
                     buffer.push({
                         y: y,
@@ -243,7 +243,7 @@ function clearGhost() {
 
 function openGround() {
     while (buffer.length > 0) {
-        if (game[buffer[0].y][buffer[0].x] == "" || game[buffer[0].y][buffer[0].x] == "O") {
+        if (game[buffer[0].y][buffer[0].x] == "" || game[buffer[0].y][buffer[0].x] == "O" || game[buffer[0].y][buffer[0].x] == "?") {
             if (field[buffer[0].y][buffer[0].x] == "m") {
                 draw(buffer[0].y, buffer[0].x, "M");
                 for (var y = 0; y < game.length; y++) {
