@@ -21,6 +21,7 @@ var mousedown = false;
 var ghost = [];
 var buffer = [];
 var opened = 0;
+var ghostPlus = false;
 
 //
 
@@ -229,6 +230,9 @@ function check(y, x, c) {
                     });
                     return 1;
                 }
+                break;
+            case "G":
+                createGhost (y, x);
         }
     }
     return 0;
@@ -267,6 +271,16 @@ function openGround() {
     }
 }
 
+function createGhost (y, x) {
+    if (game[y][x] == "") {
+        draw(y, x, "E");
+        ghost.push({
+            y: y,
+            x: x
+        });
+    }
+}
+
 //
 
 window.addEventListener('contextmenu', function (e) {
@@ -276,37 +290,53 @@ window.addEventListener('contextmenu', function (e) {
 document.getElementById("game").addEventListener("mousedown", function (e) {
     const y = Math.floor((e.clientY - canvasy) / (grid + 1));
     const x = Math.floor((e.clientX - canvasx) / (grid + 1));
-    if (e.which == 1 && game[y][x] == "") {
-        mousedown = true;
-        draw(y, x, "E");
-        ghost.push({
-            y: y,
-            x: x
-        });
+    switch (e.which) {
+        case 1:
+            if (game[y][x] == "") {
+                mousedown = true;
+                createGhost (y, x);
+            }
+            break;
+        case 3:
+            if (!mousedown) {
+                switch (game[y][x]) {
+                    case "":
+                        draw(y, x, "F");
+                        break;
+                    case "F":
+                        draw(y, x, "?");
+                        break;
+                    case "?":
+                        draw(y, x, "");
+                }
+            } else {
+                ghostPlus = true;
+                nearby(y, x, false, "G");
+            }
     }
 });
 
 document.getElementById("game").addEventListener("mousemove", function (e) {
     const y = Math.floor((e.clientY - canvasy) / (grid + 1));
     const x = Math.floor((e.clientX - canvasx) / (grid + 1));
-    if (e.which == 1 && mousedown) {
+    if (mousedown) {
         clearGhost();
-        if (game[y][x] == "") {
-            draw(y, x, "E");
-            ghost.push({
-                y: y,
-                x: x
-            });
+        createGhost (y, x);
+        if (ghostPlus) {
+            nearby(y, x, false, "G");
         }
     }
 });
 
 document.addEventListener("mouseup", function (e) {
+    if (!mousedown) {
+        return;
+    }
     var y = e.clientY - canvasy;
     var x = e.clientX - canvasx;
     clearGhost();
     mousedown = false;
-    if (e.which == 1 && y < canvas.width && x < canvas.height) {
+    if (e.which == 1 && y < canvas.width && x < canvas.height && !ghostPlus) {
         y = Math.floor(y / (grid + 1));
         x = Math.floor(x / (grid + 1));
         buffer.push({
@@ -315,20 +345,7 @@ document.addEventListener("mouseup", function (e) {
         });
         openGround();
         opened++;
-    }
-});
-
-document.addEventListener("contextmenu", function (e) {
-    const y = Math.floor((e.clientY - canvasy) / (grid + 1));
-    const x = Math.floor((e.clientX - canvasx) / (grid + 1));
-    switch (game[y][x]) {
-        case "":
-            draw(y, x, "F");
-            break;
-        case "F":
-            draw(y, x, "?");
-            break;
-        case "?":
-            draw(y, x, "");
+    } else if (ghostPlus) {
+        ghostPlus = false;
     }
 });
