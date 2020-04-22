@@ -345,7 +345,7 @@ document.addEventListener("mouseup", function (e) {
         });
         openGround();
         opened++;
-    } else {
+    } else if (ghostPlus) {
         ghostPlus = false;
     }
 });
