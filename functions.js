@@ -87,6 +87,11 @@ newGame();
 
 //
 
+function coordinates(y, x) {
+    this.y = y;
+    this.x = x;
+}
+
 function draw(y, x, i) {
     game[y][x] = i;
     switch (i) {
@@ -168,10 +173,7 @@ function newGame() {
     for (var y = 0; y < game.length; y++) {
         for (var x = 0; x < game[y].length; x++) {
             draw(y, x, game[y][x]);
-            place.push({
-                y: y,
-                x: x
-            });
+            place.push(new coordinates(y, x));
         }
     }
     for (var i = 0; i < lvl * 10; i++) {
@@ -224,10 +226,7 @@ function check(y, x, c) {
             case "E":
                 if (game[y][x] == "" || game[y][x] == "?") {
                     game[y][x] = "O";
-                    buffer.push({
-                        y: y,
-                        x: x
-                    });
+                    buffer.push(new coordinates(y, x));
                     return 1;
                 }
                 break;
@@ -274,10 +273,7 @@ function openGround() {
 function createGhost (y, x) {
     if (game[y][x] == "") {
         draw(y, x, "E");
-        ghost.push({
-            y: y,
-            x: x
-        });
+        ghost.push(new coordinates(y, x));
     }
 }
 
@@ -332,17 +328,12 @@ document.addEventListener("mouseup", function (e) {
     if (!mousedown) {
         return;
     }
-    var y = e.clientY - canvasy;
-    var x = e.clientX - canvasx;
+    const y = Math.floor((e.clientY - canvasy) / (grid + 1));
+    const x = Math.floor((e.clientX - canvasx) / (grid + 1));
     clearGhost();
     mousedown = false;
-    if (e.which == 1 && y < canvas.width && x < canvas.height && !ghostPlus) {
-        y = Math.floor(y / (grid + 1));
-        x = Math.floor(x / (grid + 1));
-        buffer.push({
-            y: y,
-            x: x
-        });
+    if (e.which == 1 && y < game.length && x < game[y].length && !ghostPlus) {
+        buffer.push(new coordinates(y, x));
         openGround();
         opened++;
     } else if (ghostPlus) {
