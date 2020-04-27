@@ -312,7 +312,7 @@ document.getElementById("game").addEventListener("mousedown", function (e) {
     }
 });
 
-document.getElementById("game").addEventListener("mousemove", function (e) {
+document.addEventListener("mousemove", function (e) {
     const y = Math.floor((e.clientY - canvasy) / (grid + 1));
     const x = Math.floor((e.clientX - canvasx) / (grid + 1));
     if (mousedown) {
