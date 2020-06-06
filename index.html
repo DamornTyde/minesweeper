@@ -5,9 +5,23 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Minesweeper</title>
         <link rel="stylesheet" type="text/css" href="style.css">
+        <script src="segment-display.js" defer></script>
         <script src="functions.js" defer></script>
     </head>
     <body>
-        <canvas id="game"></canvas>
+        <main>
+            <canvas id="game"></canvas>
+            <div id="info">
+                <p>Level:</p>
+                <canvas id="level" width="80" height="40"></canvas>
+                <p>Mines:</p>
+                <canvas id="mines" width="140" height="40"></canvas>
+                <p>Time:</p>
+                <canvas id="time" width="180" height="40"></canvas>
+            </div>
+        </main>
+        <footer>
+            <p>Damorn Tydé - 2020 (segment display's by <a href="http://www.3quarks.com/en/SegmentDisplay">3quarks</a>)</p>
+        </footer>
     </body>
 </html>

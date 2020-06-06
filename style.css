@@ -2,3 +2,21 @@
     cursor: pointer;
     float: left;
 }
+#info {
+    float: left;
+    margin-left: 20px;
+}
+p {
+    margin-bottom: 0px;
+}
+footer{
+    position: fixed;
+    bottom: 0;
+    background-color: #fff;
+    z-index: 1;
+    width: 100%;
+    line-height: 20px;
+}
+footer>p {
+    margin-top: 0px;
+}

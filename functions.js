@@ -17,11 +17,86 @@ const canvasy = canvas.offsetTop;
 var game = [];
 var field = [];
 var lvl = 1;
+var mines;
+var flags;
 var mousedown = false;
 var ghost = [];
 var buffer = [];
 var opened = 0;
 var ghostPlus = false;
+var lost = false;
+var lostCount = 0;
+
+//
+
+function digitalDisplay(id, pattern) {
+    SegmentDisplay.call(this, id);
+    this.pattern = pattern;
+    this.displayAngle = 0;
+    this.digitHeight = 20
+    this.digitWidth = 12;
+    this.digitDistance = 2.5;
+    this.segmentWidth = 3;
+    this.segmentDistance = 0.5;
+    this.segmentCount = 7;
+    this.cornerType = 0;
+    this.colorOn = "#000000";
+    this.colorOff = "#efefef";
+    this.timer = false;
+}
+
+digitalDisplay.prototype = Object.create(SegmentDisplay.prototype);
+
+digitalDisplay.prototype.newDisplay = function (item) {
+    var text = '';
+    while (text.length < this.pattern.length - item.length) {
+        text += ' ';
+    }
+    text += item;
+    this.setValue(text);
+}
+
+digitalDisplay.prototype.startclock = function () {
+    if (!this.timer) {
+        const func = this.AnimateClock.bind(this);
+        this.timer = true;
+        this.seconds = 0;
+        this.startTime = new Date();
+        this.req = window.requestAnimationFrame(func);
+    }
+}
+
+digitalDisplay.prototype.AnimateClock = function () {
+    const func = this.AnimateClock.bind(this);
+    const time = new Date();
+    time.setTime(new Date - this.startTime);
+    const seconds = time.getUTCSeconds();
+    if (seconds != this.seconds) {
+        this.seconds = seconds;
+        const minutes = time.getUTCMinutes() + time.getUTCHours() * 60;
+        const text = `${minutes}:` + ((seconds < 10) ? "0" : "") + seconds;
+        this.newDisplay(text);
+        if (text == "1439:59") {
+            this.timer = false;
+            return;
+        }
+    }
+    this.req = window.requestAnimationFrame(func);
+}
+
+digitalDisplay.prototype.stopClock = function () {
+    window.cancelAnimationFrame(this.req);
+    this.timer = false;
+}
+
+const levelDisplay = new digitalDisplay("level", "###");
+const minesDisplay = new digitalDisplay("mines", "#####");
+const timeDisplay = new digitalDisplay("time", "####:##");
+
+function coordinates(y, x) {
+    this.y = y;
+    this.x = x;
+}
 
 //
 
@@ -87,11 +162,6 @@ newGame();
 
 //
 
-function coordinates(y, x) {
-    this.y = y;
-    this.x = x;
-}
-
 function draw(y, x, i) {
     game[y][x] = i;
     switch (i) {
@@ -145,7 +215,7 @@ function draw(y, x, i) {
             break;
         case 8:
             openCell(y, x, "#bdbdbd");
-            drawNumber(y, x, "#888888", i);
+            drawNumber(y, x, "#6b6b6b", i);
             break;
         case "?":
             ctx.drawImage(closed, x * grid + x + 1, y * grid + y + 1);
@@ -162,7 +232,13 @@ function newGame() {
     var row = [];
     var place = [];
     game.splice(0, game.length);
+    field.splice(0, field.length);
     opened = 0;
+    mines = lvl * 10;
+    flags = 0;
+    levelDisplay.newDisplay(`${lvl}`);
+    minesDisplay.newDisplay(`${mines}`);
+    timeDisplay.newDisplay("0:00");
     while (row.length < size) {
         row.push("");
     }
@@ -176,7 +252,7 @@ function newGame() {
             place.push(new coordinates(y, x));
         }
     }
-    for (var i = 0; i < lvl * 10; i++) {
+    for (var i = 0; i < mines; i++) {
         const m = Math.floor(Math.random() * place.length);
         field[place[m].y][place[m].x] = "m";
         place.splice(m, 1);
@@ -232,6 +308,11 @@ function check(y, x, c) {
                 break;
             case "G":
                 createGhost (y, x);
+                break;
+            case "F":
+                if (game[y][x] == "F") {
+                    return 1;
+                }
         }
     }
     return 0;
@@ -258,19 +339,32 @@ function openGround() {
                         }
                     }
                 }
+                lost = true;
+                lostCount++;
             } else if (field[buffer[0].y][buffer[0].x] == "") {
                 draw(buffer[0].y, buffer[0].x, "E");
                 opened += nearby(buffer[0].y, buffer[0].x, false, "E");
             } else {
-                const temp = field[buffer[0].y][buffer[0].x];
-                draw(buffer[0].y, buffer[0].x, temp);
+                draw(buffer[0].y, buffer[0].x, field[buffer[0].y][buffer[0].x]);
             }
         }
         buffer.shift();
     }
+    if (lost) {
+        if (lostCount == 3) {
+            lostCount = 0;
+            lvl--;
+            alert(`You lost 3 times in a row so you're now on level:${lvl}`);
+        } else {
+            alert(`You lost so you can try level ${lvl} again`);
+        }
+        timeDisplay.stopClock();
+        lost = false;
+        newGame();
+    }
 }
 
-function createGhost (y, x) {
+function createGhost(y, x) {
     if (game[y][x] == "") {
         draw(y, x, "E");
         ghost.push(new coordinates(y, x));
@@ -298,13 +392,16 @@ document.getElementById("game").addEventListener("mousedown", function (e) {
                 switch (game[y][x]) {
                     case "":
                         draw(y, x, "F");
+                        flags++;
                         break;
                     case "F":
                         draw(y, x, "?");
+                        flags--;
                         break;
                     case "?":
                         draw(y, x, "");
                 }
+                minesDisplay.newDisplay(`${mines - flags}`);
             } else {
                 ghostPlus = true;
                 nearby(y, x, false, "G");
@@ -325,7 +422,7 @@ document.addEventListener("mousemove", function (e) {
 });
 
 document.addEventListener("mouseup", function (e) {
-    if (!mousedown) {
+    if (!mousedown || lost) {
         return;
     }
     const y = Math.floor((e.clientY - canvasy) / (grid + 1));
@@ -336,7 +433,17 @@ document.addEventListener("mouseup", function (e) {
         buffer.push(new coordinates(y, x));
         openGround();
         opened++;
+        timeDisplay.startclock();
     } else if (ghostPlus) {
         ghostPlus = false;
+    }
+});
+
+document.getElementById("game").addEventListener("dblclick", function (e) {
+    const y = Math.floor((e.clientY - canvasy) / (grid + 1));
+    const x = Math.floor((e.clientX - canvasx) / (grid + 1));
+    if (!isNaN(game[y][x]) && nearby(y, x, false, "F") == game[y][x]) {
+        opened += nearby(y, x, false, "E");
+        openGround();
     }
 });
