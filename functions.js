@@ -354,12 +354,17 @@ function openGround() {
         if (lostCount == 3) {
             lostCount = 0;
             lvl--;
-            alert(`You lost 3 times in a row so you're now on level:${lvl}`);
+            alert(`You lost 3 times in a row so you're now on level ${lvl}`);
         } else {
             alert(`You lost so you can try level ${lvl} again`);
         }
         timeDisplay.stopClock();
         lost = false;
+        newGame();
+    } else if (mines + opened == game.length * game[0].length) {
+        timeDisplay.stopClock();
+        lvl++;
+        alert(`You won, now you can try level ${lvl}`);
         newGame();
     }
 }
@@ -431,8 +436,8 @@ document.addEventListener("mouseup", function (e) {
     mousedown = false;
     if (e.which == 1 && y < game.length && x < game[y].length && !ghostPlus) {
         buffer.push(new coordinates(y, x));
-        openGround();
         opened++;
+        openGround();
         timeDisplay.startclock();
     } else if (ghostPlus) {
         ghostPlus = false;
