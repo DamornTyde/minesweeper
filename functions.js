@@ -24,7 +24,6 @@ var ghost = [];
 var buffer = [];
 var opened = 0;
 var ghostPlus = false;
-var lost = false;
 var lostCount = 0;
 
 //
@@ -326,6 +325,7 @@ function clearGhost() {
 }
 
 function openGround() {
+    var lost = false;
     while (buffer.length > 0) {
         if (game[buffer[0].y][buffer[0].x] == "" || game[buffer[0].y][buffer[0].x] == "O" || game[buffer[0].y][buffer[0].x] == "?") {
             if (field[buffer[0].y][buffer[0].x] == "m") {
@@ -359,7 +359,6 @@ function openGround() {
             alert(`You lost so you can try level ${lvl} again`);
         }
         timeDisplay.stopClock();
-        lost = false;
         newGame();
     } else if (mines + opened == game.length * game[0].length) {
         timeDisplay.stopClock();
@@ -428,7 +427,7 @@ document.getElementById("game").addEventListener("mousemove", function (e) {
 });
 
 document.getElementById("game").addEventListener("mouseup", function (e) {
-    if (!mousedown || lost) {
+    if (!mousedown) {
         return;
     }
     const y = Math.floor((e.clientY - canvasy) / (grid + 1));
