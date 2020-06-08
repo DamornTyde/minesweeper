@@ -426,7 +426,7 @@ document.getElementById("game").addEventListener("mousemove", function (e) {
     }
 });
 
-document.getElementById("game").addEventListener("mouseup", function (e) {
+document.addEventListener("mouseup", function (e) {
     if (!mousedown) {
         return;
     }
