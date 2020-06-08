@@ -438,8 +438,8 @@ document.getElementById("game").addEventListener("mouseup", function (e) {
     if (e.which == 1 && y < game.length && x < game[y].length && !ghostPlus) {
         buffer.push(new coordinates(y, x));
         opened++;
-        openGround();
         timeDisplay.startclock();
+        openGround();
     } else if (ghostPlus) {
         ghostPlus = false;
     }
