@@ -364,6 +364,7 @@ function openGround() {
     } else if (mines + opened == game.length * game[0].length) {
         timeDisplay.stopClock();
         lvl++;
+        lostCount = 0;
         alert(`You won, now you can try level ${lvl}`);
         newGame();
     }
