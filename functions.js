@@ -350,23 +350,25 @@ function openGround() {
         }
         buffer.shift();
     }
-    if (lost) {
-        if (lostCount == 3) {
+    setTimeout(function () {
+        if (lost) {
+            if (lostCount == 3) {
+                lostCount = 0;
+                lvl--;
+                alert(`You lost 3 times in a row so you're now on level ${lvl}`);
+            } else {
+                alert(`You lost so you can try level ${lvl} again`);
+            }
+            timeDisplay.stopClock();
+            newGame();
+        } else if (mines + opened == game.length * game[0].length) {
+            timeDisplay.stopClock();
+            lvl++;
             lostCount = 0;
-            lvl--;
-            alert(`You lost 3 times in a row so you're now on level ${lvl}`);
-        } else {
-            alert(`You lost so you can try level ${lvl} again`);
+            alert(`You won, now you can try level ${lvl}`);
+            newGame();
         }
-        timeDisplay.stopClock();
-        newGame();
-    } else if (mines + opened == game.length * game[0].length) {
-        timeDisplay.stopClock();
-        lvl++;
-        lostCount = 0;
-        alert(`You won, now you can try level ${lvl}`);
-        newGame();
-    }
+    }, 50);
 }
 
 function createGhost(y, x) {
